@@ -1,4 +1,5 @@
 {
+  "project": "ultimate-blog/tsconfig.json",
   "parser": "@typescript-eslint/parser",
   "parserOptions": {
     "project": "ultimate-blog/tsconfig.json"
