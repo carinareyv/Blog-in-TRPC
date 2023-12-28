@@ -13,5 +13,8 @@ const config = {
     locales: ["en"],
     defaultLocale: "en",
   },
+  images: {
+    domains: ['lh3.googleusercontent.com', 'cloudflare-ipfs.com']
+  }
 };
 export default config;
