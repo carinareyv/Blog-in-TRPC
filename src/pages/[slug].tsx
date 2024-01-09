@@ -5,12 +5,13 @@ import { trpc } from "../utils/trpc";
 import { AiOutlineLoading3Quarters } from "react-icons/ai";
 import { BsChat } from "react-icons/bs";
 import { FcLike, FcLikePlaceholder } from "react-icons/fc";
+import CommentSideBar from "../components/CommentSideBar";
 
 const PostPage = () => {
   const router = useRouter();
 
   const postRoute = trpc.useContext().post;
-  
+
   const getPost = trpc.post.getPost.useQuery(
     {
       slug: router.query.slug as string,
@@ -20,25 +21,31 @@ const PostPage = () => {
     }
   );
 
-  const invalidateCurrentPostPage = useCallback(
-    () => {
-      postRoute.getPost.invalidate({slug: router.query.slug as string})
-    }, []
-  )
+  const invalidateCurrentPostPage = useCallback(() => {
+    postRoute.getPost.invalidate({ slug: router.query.slug as string });
+  }, []);
   const likePost = trpc.post.likePost.useMutation({
     onSuccess: () => {
-      invalidateCurrentPostPage()
+      invalidateCurrentPostPage();
     },
   });
 
   const dislikePost = trpc.post.dislikePost.useMutation({
     onSuccess: () => {
-      invalidateCurrentPostPage()
+      invalidateCurrentPostPage();
     },
   });
 
+  const [showCommentSideBar, setShowCommentSideBar] = useState(false);
   return (
     <MainLayout>
+      {getPost.data?.id && (
+        <CommentSideBar
+          showCommentSideBar={showCommentSideBar}
+          setShowCommentSideBar={setShowCommentSideBar}
+          postId={getPost.data?.id}
+        />
+      )}
       {getPost.isLoading && (
         <div className="flex h-full w-full items-center justify-center space-x-4">
           <div>
@@ -51,7 +58,7 @@ const PostPage = () => {
       {getPost.isSuccess && (
         <div className="fixed bottom-10 flex w-full items-center justify-center">
           <div className="group flex items-center justify-center space-x-4 rounded-full border border-gray-400 bg-white px-6 py-3 transition duration-300 hover:border-gray-900">
-            <div className="border-r pr-4 transition duration-300 group-hover:border-gray-900">
+            <div className="border-r pr-4 shadow-xl transition duration-300 group-hover:border-gray-900">
               {getPost.data?.likes && getPost.data?.likes.length > 0 ? (
                 <FcLike
                   onClick={() =>
@@ -71,7 +78,10 @@ const PostPage = () => {
               )}
             </div>
             <div>
-              <BsChat className="text-base" />
+              <BsChat
+                className="cursor-pointer text-base"
+                onClick={() => setShowCommentSideBar(true)}
+              />
             </div>
           </div>
         </div>
