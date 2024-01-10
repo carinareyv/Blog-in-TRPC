@@ -4,7 +4,7 @@ const prisma = new PrismaClient();
 
 async function main() {
   // create fake users
-  const fakeArray = Array.from({ length: 50 }).map((_, idx) => idx);
+  const fakeArray = Array.from({ length: 10 }).map((_, idx) => idx);
   console.log("seeding the db!");
 
   for await (const i of fakeArray) {
