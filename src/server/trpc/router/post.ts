@@ -21,6 +21,38 @@ export const postRouter = router({
       });
     }),
 
+  getReadingList: protectedProcedure.query(
+    async ({ ctx: { prisma, session } }) => {
+      const allBookmarks = await prisma.bookmark.findMany({
+        where: {
+          userId: session.user.id,
+        },
+        take: 4,
+        orderBy: {
+          createdAt: "desc",
+        },
+        select: {
+          id: true,
+          post: {
+            select: {
+              title: true,
+              description: true,
+              createdAt: true,
+              slug: true,
+              author: {
+                select: {
+                  name: true,
+                  image: true,
+                },
+              },
+            },
+          },
+        },
+      });
+      return allBookmarks;
+    }
+  ),
+
   removeBookmark: protectedProcedure
     .input(
       z.object({
@@ -59,33 +91,34 @@ export const postRouter = router({
       });
     }),
 
-
-  getComments: publicProcedure.input(
-    z.object({
-      postId: z.string()
-    })
-  ).query(async ({ ctx: { prisma }, input: {postId} }) => {
-    const comments = await prisma.comment.findMany({
-      where: {
-        postId
-      },
-      orderBy: {
-        createdAt: "desc",
-      },
-      select: {
-        id: true,
-        createdAt: true,
-       text: true,
-       user: {
+  getComments: publicProcedure
+    .input(
+      z.object({
+        postId: z.string(),
+      })
+    )
+    .query(async ({ ctx: { prisma }, input: { postId } }) => {
+      const comments = await prisma.comment.findMany({
+        where: {
+          postId,
+        },
+        orderBy: {
+          createdAt: "desc",
+        },
         select: {
-          name: true,
-          image: true,
-        }
-       }
-      },
-    });
-    return comments;
-  }),
+          id: true,
+          createdAt: true,
+          text: true,
+          user: {
+            select: {
+              name: true,
+              image: true,
+            },
+          },
+        },
+      });
+      return comments;
+    }),
 
   //posts
   createPost: protectedProcedure
@@ -171,6 +204,7 @@ export const postRouter = router({
           select: {
             name: true,
             image: true,
+            username: true,
           },
         },
         bookmarks: session?.user?.id
