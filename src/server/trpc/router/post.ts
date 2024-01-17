@@ -122,11 +122,17 @@ export const postRouter = router({
 
   //posts
   createPost: protectedProcedure
-    .input(writePostSchema)
+    .input(
+      writePostSchema.and(
+        z.object({
+          tagId: z.string().optional(),
+        })
+      )
+    )
     .mutation(
       async ({
         ctx: { prisma, session },
-        input: { title, description, text },
+        input: { title, description, text, tagId },
       }) => {
         await prisma.post.create({
           data: {
@@ -134,6 +140,11 @@ export const postRouter = router({
             description,
             text,
             slug: slugify(title),
+            tags: {
+              connect: {
+                id: tagId,
+              },
+            },
             author: {
               connect: {
                 id: session.user.id,
@@ -214,6 +225,13 @@ export const postRouter = router({
               },
             }
           : false,
+        tags: {
+          select: {
+            name: true,
+            id: true,
+            slug: true,
+          },
+        },
       },
     });
     return posts;
