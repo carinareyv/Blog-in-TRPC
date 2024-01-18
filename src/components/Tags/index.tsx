@@ -2,13 +2,17 @@ import { Fragment, useMemo, useState } from "react";
 import { Combobox, Transition } from "@headlessui/react";
 import { HiCheck } from "react-icons/hi";
 import { HiChevronUpDown } from "react-icons/hi2";
+import type {Tag} from "../WriteFormModal";
+
 
 type TagsProps = {
-  tags: { id: string; name: string }[];
-  setSelectedTagId: React.Dispatch<React.SetStateAction<string>>;
+  tags: Tag[];
+  selectedTags: Tag[];
+  setSelectedTags: React.Dispatch<React.SetStateAction<Tag[]>>;
 };
 
-export default function Tags({ tags, setSelectedTagId }: TagsProps) {
+export default function Tags({ tags, selectedTags, setSelectedTags }: TagsProps) {
+
   const [selected, setSelected] = useState(tags[0]);
   const [query, setQuery] = useState("");
 
@@ -26,15 +30,16 @@ export default function Tags({ tags, setSelectedTagId }: TagsProps) {
   return (
     <Combobox
       value={selected}
-      onChange={(value) => {
-        setSelected(value);
-        setSelectedTagId(value.id);
+      onChange={(tag) => {
+        setSelected(tag);
+        setSelectedTags((prev)=>([...prev, tag]))
+
       }}
     >
       <div className="relative mt-1">
         <div className="relative w-full cursor-default overflow-hidden rounded-lg bg-white text-left shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-white/75 focus-visible:ring-offset-2 focus-visible:ring-offset-teal-300 sm:text-sm">
           <Combobox.Input
-            className="w-full border-none py-2 pl-3 pr-10 text-sm leading-5 text-gray-900 outline-none focus:ring-0"
+            className="w-full px-4 py-2 pr-10 text-sm leading-5 text-gray-900 outline-none focus:ring-0"
             displayValue={(tag: { name: string }) => tag.name}
             onChange={(event) => setQuery(event.target.value)}
           />
@@ -77,7 +82,7 @@ export default function Tags({ tags, setSelectedTagId }: TagsProps) {
                       >
                         {tag.name}
                       </span>
-                      {selected ? (
+                      {selectedTags.includes(tag) ? (
                         <span
                           className={`absolute inset-y-0 left-0 flex items-center pl-3 ${
                             active ? "text-white" : "text-gray-600"
