@@ -3,6 +3,7 @@ import { writePostSchema } from "../../../components/WriteFormModal";
 import { router, protectedProcedure, publicProcedure } from "../trpc";
 import { z } from "zod";
 import { commentFormSchema } from "../../../components/CommentSideBar";
+import { TRPCError } from "@trpc/server";
 
 export const postRouter = router({
   //bookmarks
@@ -125,9 +126,13 @@ export const postRouter = router({
     .input(
       writePostSchema.and(
         z.object({
-          tagsIds: z.array(z.object({
-            id: z.string(),
-          })).optional(),
+          tagsIds: z
+            .array(
+              z.object({
+                id: z.string(),
+              })
+            )
+            .optional(),
         })
       )
     )
@@ -195,6 +200,9 @@ export const postRouter = router({
                 },
               }
             : false,
+          authorId: true,
+          slug: true,
+          featuredImage: true,
         },
       });
       return post;
@@ -232,6 +240,7 @@ export const postRouter = router({
             slug: true,
           },
         },
+        featuredImage: true,
       },
     });
     return posts;
@@ -251,4 +260,37 @@ export const postRouter = router({
         },
       });
     }),
+
+  updatePostFeaturedImage: protectedProcedure
+    .input(
+      z.object({
+        imageUrl: z.string().url(),
+        postId: z.string(),
+      })
+    )
+    .mutation(
+      async ({ ctx: { prisma, session }, input: { imageUrl, postId } }) => {
+        const postData = await prisma.post.findUnique({
+          where: {
+            id: postId,
+          },
+        });
+
+        if (postData?.authorId !== session.user.id) {
+          throw new TRPCError({
+            code: "FORBIDDEN",
+            message: "Only the owner of the post can update the image",
+          });
+        }
+
+        await prisma.post.update({
+          where: {
+            id: postId,
+          },
+          data: {
+            featuredImage: imageUrl,
+          },
+        });
+      }
+    ),
 });
