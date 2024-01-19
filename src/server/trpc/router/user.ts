@@ -55,6 +55,7 @@ export const userRouter = router({
               title: true,
               description: true,
               createdAt: true,
+              featuredImage: true,
               author: {
                 select: {
                   name: true,
@@ -69,11 +70,103 @@ export const userRouter = router({
                     },
                   }
                 : false,
+                tags: {
+                  select: {
+                    name: true,
+                    id: true,
+                    slug: true,
+                  },
+                },
             },
           },
         },
       });
     }),
+
+  getUsersSuggestions: protectedProcedure.query(
+    async ({ ctx: { prisma, session } }) => {
+      //we suggest users based on the tags of the posts saved and bookmarked
+
+      const tagsToSuggest = {
+        where: {
+          userId: session.user.id,
+        },
+        select: {
+          post: {
+            select: {
+              tags: {
+                select: {
+                  name: true,
+                },
+              },
+            },
+          },
+        },
+        take: 10,
+      };
+
+      const likedPostsTags = await prisma.like.findMany(tagsToSuggest);
+
+      const bookmarkedPostsTags = await prisma.bookmark.findMany(tagsToSuggest);
+
+      const interestedTags: string[] = [];
+
+      likedPostsTags.forEach((like) => {
+        interestedTags.push(...like.post.tags.map((tag) => tag.name));
+      });
+      bookmarkedPostsTags.forEach((bm) => {
+        interestedTags.push(...bm.post.tags.map((tag) => tag.name));
+      });
+
+      const suggestions = await prisma.user.findMany({
+        where: {
+          OR: [
+            {
+              likes: {
+                some: {
+                  post: {
+                    tags: {
+                      some: {
+                        name: {
+                          in: interestedTags,
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+            {
+              bookmarks: {
+                some: {
+                  post: {
+                    tags: {
+                      some: {
+                        name: {
+                          in: interestedTags,
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          ],
+          NOT: {
+            id: session.user.id,
+          },
+        },
+        select: {
+          image: true,
+          name: true,
+          username: true,
+          id: true,
+        },
+        take: 5,
+      });
+      return suggestions;
+    }
+  ),
 
   uploadAvatar: protectedProcedure
     .input(
