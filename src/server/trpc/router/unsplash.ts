@@ -3,19 +3,15 @@ import { protectedProcedure, router } from "../trpc";
 import { env } from "../../../env/server.mjs";
 import { createApi } from "unsplash-js";
 import { TRPCError } from "@trpc/server";
-import { unsplashSearchSchema } from "../../../pages/[slug]";
+import { unsplashSearchSchema } from "../../../components/UnsplashGallery";
 
 const unsplash = createApi({
   accessKey: env.UNSPLASH_API_ACCESS_KEY,
 });
 
-
-
 export const unsplashRouter = router({
   getImages: protectedProcedure
-    .input(
-      unsplashSearchSchema
-    )
+    .input(unsplashSearchSchema)
     .query(async ({ input: { searchQuery } }) => {
       try {
         const imagesData = await unsplash.search.getPhotos({

@@ -7,14 +7,7 @@ import { BsChat } from "react-icons/bs";
 import { FcLike, FcLikePlaceholder } from "react-icons/fc";
 import CommentSideBar from "../components/CommentSideBar";
 import { BiImageAdd } from "react-icons/bi";
-import Modal from "../components/Modal";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
-
-export const unsplashSearchSchema =  z.object({
-  searchQuery: z.string().min(5),
-})
+import UnsplashGallery from "../components/UnsplashGallery";
 
 const PostPage = () => {
   const router = useRouter();
@@ -47,28 +40,16 @@ const PostPage = () => {
 
   const [showCommentSideBar, setShowCommentSideBar] = useState(false);
 
-  const [isUnsplashedModalOpen, setIsUnsplashedModalOpen] = useState(false);
-
-  const {register, watch} = useForm<{searchQuery:string}>({
-    resolver: zodResolver(unsplashSearchSchema)
-  });
-
-  const searchQuery = watch('searchQuery');
-
-  const fetchUnsplashImages = trpc.unsplash.getImages.useQuery({
-    searchQuery
-  }, {
-    enabled: Boolean(searchQuery)
-  })
-
-  console.log(fetchUnsplashImages)
+  const [isUnsplashModalOpen, setIsUnsplashModalOpen] = useState(false);
 
   return (
     <MainLayout>
+      {getPost.isSuccess && getPost.data && <UnsplashGallery
+        isUnsplashModalOpen={isUnsplashModalOpen}
+        setIsUnsplashModalOpen={setIsUnsplashModalOpen}
+        postId={getPost.data?.id}
+      />}
 
-      <Modal isOpen={isUnsplashedModalOpen} onClose={()=>setIsUnsplashedModalOpen(false)}>
-       <form onSubmit={(e)=>e.preventDefault()}><input type="text" id="search" {...register('searchQuery')} className="h-full w-full rounded-xl border border-gray-300 p-4 outline-none focus:border-gray-600" /></form>
-      </Modal>
       {getPost.data?.id && (
         <CommentSideBar
           showCommentSideBar={showCommentSideBar}
@@ -119,9 +100,12 @@ const PostPage = () => {
       <div className="flex h-full w-full flex-col items-center justify-center p-10">
         <div className="flex w-full max-w-screen-lg flex-col space-y-6">
           <div className="relative h-[60vh] w-full rounded-xl bg-gray-300 shadow-lg ">
-          <div onClick={()=>setIsUnsplashedModalOpen(true)} className="absolute top-2 left-2 bg-black/30 cursor-pointer hover:bg-black p-2 z-10 text-white rounded-lg">
-                  <BiImageAdd className="text-2xl"/>
-          </div>
+            <div
+              onClick={() => setIsUnsplashModalOpen(true)}
+              className="absolute left-2 top-2 z-10 cursor-pointer rounded-lg bg-black/30 p-2 text-white hover:bg-black"
+            >
+              <BiImageAdd className="text-2xl" />
+            </div>
             <div className="absolute flex h-full w-full items-center justify-center">
               <div className="rounded-xl bg-black bg-opacity-50 p-4 text-3xl text-white">
                 {getPost.data?.title}

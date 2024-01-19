@@ -9,7 +9,7 @@ import toast from "react-hot-toast";
 import { AiOutlineLoading3Quarters } from "react-icons/ai";
 import Tags from "../Tags";
 import TagForm from "../TagForm";
-import {FaTimes} from 'react-icons/fa';
+import { FaTimes } from "react-icons/fa";
 
 export type Tag = { id: string; name: string };
 
@@ -76,7 +76,11 @@ const WriteFormModal = () => {
             />
             <div className="my-4 flex w-full items-center space-x-4">
               <div className="z-10 w-4/5">
-                <Tags tags={getTags.data} setSelectedTags={setSelectedTags} selectedTags={selectedTags} />
+                <Tags
+                  tags={getTags.data}
+                  setSelectedTags={setSelectedTags}
+                  selectedTags={selectedTags}
+                />
               </div>
 
               <button
@@ -86,16 +90,25 @@ const WriteFormModal = () => {
                 Create Tag
               </button>
             </div>
-            <div className="w-full flex items-center my-4 flex-wrap ">
+            <div className="my-4 flex w-full flex-wrap items-center ">
               {selectedTags.map((tag) => (
                 <div
-                key={tag.id}
-                className="flex items-center justify-center space-x-2 rounded-2xl bg-gray-200/50 px-5 py-3 m-2 whitespace-nowrap"
+                  key={tag.id}
+                  className="m-2 flex items-center justify-center space-x-2 whitespace-nowrap rounded-2xl bg-gray-200/50 px-5 py-3"
                 >
-                <div>{tag.name}</div>
-                <div className="cursor-pointer" onClick={()=> setSelectedTags((prev)=>(prev.filter((currentTag)=>currentTag.id !== tag.id)))}><FaTimes/></div>
+                  <div>{tag.name}</div>
+                  <div
+                    className="cursor-pointer"
+                    onClick={() =>
+                      setSelectedTags((prev) =>
+                        prev.filter((currentTag) => currentTag.id !== tag.id)
+                      )
+                    }
+                  >
+                    <FaTimes />
+                  </div>
                 </div>
-                ))}
+              ))}
             </div>
           </>
         )}
