@@ -29,3 +29,4 @@ Follow our deployment guides for [Vercel](https://create.t3.gg/en/deployment/ver
 
 ## start docker 
 ## pnpm dev
+## npx prisma db push to sync db if changes are made to the db schema

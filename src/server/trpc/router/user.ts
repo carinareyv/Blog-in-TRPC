@@ -5,19 +5,102 @@ import { createClient } from "@supabase/supabase-js";
 import { env } from "../../../env/server.mjs";
 import { isDataURI } from "validator";
 import { TRPCError } from "@trpc/server";
+import { trpc } from "../../../utils/trpc";
 
 const supabase = createClient(
   env.NEXT_PUBLIC_SUPABASE_PUBLIC_URL,
   env.NEXT_PUBLIC_SUPABASE_PUBLIC_KEY
 );
 export const userRouter = router({
+  followUser: protectedProcedure
+    .input(
+      z.object({
+        userIdToFollow: z.string(),
+      })
+    )
+    .mutation(
+      async ({ ctx: { prisma, session }, input: { userIdToFollow } }) => {
+        if (userIdToFollow === session.user.id) {
+          throw new TRPCError({
+            code: "BAD_REQUEST",
+            message: "You cannot follow yourself",
+          });
+        }
+        await prisma.user.update({
+          where: {
+            id: session.user.id,
+          },
+          data: {
+            followings: {
+              connect: {
+                id: userIdToFollow,
+              },
+            },
+          },
+        });
+      }
+    ),
+
+  getAllFollowers: protectedProcedure.input(
+    z.object({
+      userId: z.string()
+    })
+  ).query(
+    async ({ ctx: { prisma, session }, input:{userId} }) => {
+      return await prisma.user.findUnique({
+        where: {
+          id: userId,
+        },
+        select: {
+          followedBy: {
+            select: {
+              name: true,
+              username: true,
+              id: true,
+              image: true,
+              followedBy: {
+                where: {
+                  id: session.user.id,
+                },
+              },
+            },
+          },
+        },
+      });
+    }
+  ),
+
+  getAllFollowing: protectedProcedure.input(
+    z.object({
+      userId: z.string()
+    })
+  ).query(
+    async ({ ctx: { prisma, session }, input: {userId} }) => {
+      return await prisma.user.findUnique({
+        where: {
+          id: userId,
+        },
+        select: {
+          followings: {
+            select: {
+              name: true,
+              username: true,
+              id: true,
+              image: true,
+            },
+          },
+        },
+      });
+    }
+  ),
+
   getUserProfile: publicProcedure
     .input(
       z.object({
         username: z.string(),
       })
     )
-    .query(async ({ ctx: { prisma }, input: { username } }) => {
+    .query(async ({ ctx: { prisma, session }, input: { username } }) => {
       return await prisma.user.findUnique({
         where: {
           username: username,
@@ -30,8 +113,17 @@ export const userRouter = router({
           _count: {
             select: {
               posts: true,
+              followedBy: true,
+              followings: true,
             },
           },
+          followedBy: session?.user?.id
+            ? {
+                where: {
+                  id: session?.user?.id,
+                },
+              }
+            : false,
         },
       });
     }),
@@ -70,13 +162,13 @@ export const userRouter = router({
                     },
                   }
                 : false,
-                tags: {
-                  select: {
-                    name: true,
-                    id: true,
-                    slug: true,
-                  },
+              tags: {
+                select: {
+                  name: true,
+                  id: true,
+                  slug: true,
                 },
+              },
             },
           },
         },
@@ -167,6 +259,29 @@ export const userRouter = router({
       return suggestions;
     }
   ),
+
+  unfollowUser: protectedProcedure
+    .input(
+      z.object({
+        userIdToUnfollow: z.string(),
+      })
+    )
+    .mutation(
+      async ({ ctx: { prisma, session }, input: { userIdToUnfollow } }) => {
+        await prisma.user.update({
+          where: {
+            id: session.user.id,
+          },
+          data: {
+            followings: {
+              disconnect: {
+                id: userIdToUnfollow,
+              },
+            },
+          },
+        });
+      }
+    ),
 
   uploadAvatar: protectedProcedure
     .input(
