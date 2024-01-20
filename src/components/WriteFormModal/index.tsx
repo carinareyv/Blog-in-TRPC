@@ -1,7 +1,7 @@
 import React, { useContext, useState } from "react";
 import Modal from "../Modal";
 import { GlobalContext } from "../../contexts/GlobalContextProvider";
-import { useForm } from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { trpc } from "../../utils/trpc";
@@ -10,6 +10,13 @@ import { AiOutlineLoading3Quarters } from "react-icons/ai";
 import Tags from "../Tags";
 import TagForm from "../TagForm";
 import { FaTimes } from "react-icons/fa";
+import "react-quill/dist/quill.snow.css";
+import dynamic from "next/dynamic";
+
+//We are using (and importing) dynamic because we need to disable server-side rendering to use the ReactQuill React Component since document is only defined on client browser (CSR)
+const ReactQuill = dynamic(() => import("react-quill"), {
+  ssr: false,
+});
 
 export type Tag = { id: string; name: string };
 
@@ -17,12 +24,14 @@ type WriteFormType = {
   title: string;
   description: string;
   text: string;
+  html: string;
 };
 
 export const writePostSchema = z.object({
   title: z.string().min(10),
   description: z.string().min(60),
-  text: z.string().min(100),
+  text: z.string().min(100).optional(),
+  html: z.string().min(100),
 });
 
 const WriteFormModal = () => {
@@ -33,6 +42,7 @@ const WriteFormModal = () => {
     handleSubmit,
     formState: { errors },
     reset,
+    control,
   } = useForm<WriteFormType>({
     resolver: zodResolver(writePostSchema),
   });
@@ -114,7 +124,10 @@ const WriteFormModal = () => {
         )}
 
         <form
-          onSubmit={handleSubmit(onSubmit)}
+          onSubmit={handleSubmit((data) => {
+            console.log(data);
+            onSubmit(data);
+          })}
           className="relative flex flex-col items-center justify-center space-y-4"
         >
           {createPost.isLoading && (
@@ -142,14 +155,30 @@ const WriteFormModal = () => {
           <p className="w-full pb-2 text-left text-sm text-red-500">
             {errors.description?.message}
           </p>
-          <textarea
+          {/*<textarea
             id="mainBody"
             cols={10}
             rows={10}
             className="focus:border-grey-600 h-full w-full rounded-xl border border-gray-300 p-4 outline-none"
             placeholder="Blog post main body"
             {...register("text")}
+          />*/}
+          <Controller
+            name="html"
+            control={control}
+            render={({ field }) => (
+              <div className="w-full">
+                <ReactQuill
+                  theme="snow"
+                  {...field}
+                  placeholder="Write your post here"
+                  value={field.value}
+                  onChange={(value) => field.onChange(value)}
+                />
+              </div>
+            )}
           />
+
           <p className="w-full pb-2 text-left text-sm text-red-500">
             {errors.text?.message}
           </p>

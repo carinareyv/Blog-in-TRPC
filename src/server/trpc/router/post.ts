@@ -139,13 +139,14 @@ export const postRouter = router({
     .mutation(
       async ({
         ctx: { prisma, session },
-        input: { title, description, text, tagsIds },
+        input: { title, description, text, tagsIds, html },
       }) => {
         await prisma.post.create({
           data: {
             title,
             description,
             text,
+            html,
             slug: slugify(title),
             tags: {
               connect: tagsIds,
@@ -193,6 +194,7 @@ export const postRouter = router({
           description: true,
           title: true,
           text: true,
+          html: true,
           likes: session?.user?.id
             ? {
                 where: {
