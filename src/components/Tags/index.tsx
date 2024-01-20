@@ -2,8 +2,7 @@ import { Fragment, useMemo, useState } from "react";
 import { Combobox, Transition } from "@headlessui/react";
 import { HiCheck } from "react-icons/hi";
 import { HiChevronUpDown } from "react-icons/hi2";
-import type {Tag} from "../WriteFormModal";
-
+import type { Tag } from "../WriteFormModal";
 
 type TagsProps = {
   tags: Tag[];
@@ -11,8 +10,11 @@ type TagsProps = {
   setSelectedTags: React.Dispatch<React.SetStateAction<Tag[]>>;
 };
 
-export default function Tags({ tags, selectedTags, setSelectedTags }: TagsProps) {
-
+export default function Tags({
+  tags,
+  selectedTags,
+  setSelectedTags,
+}: TagsProps) {
   const [selected, setSelected] = useState(tags[0]);
   const [query, setQuery] = useState("");
 
@@ -32,8 +34,7 @@ export default function Tags({ tags, selectedTags, setSelectedTags }: TagsProps)
       value={selected}
       onChange={(tag) => {
         setSelected(tag);
-        setSelectedTags((prev)=>([...prev, tag]))
-
+        setSelectedTags((prev) => [...prev, tag]);
       }}
     >
       <div className="relative mt-1">
