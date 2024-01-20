@@ -1,11 +1,13 @@
 import React, { useContext } from "react";
 import { IoReorderThreeOutline } from "react-icons/io5";
 import { BsBell } from "react-icons/bs";
+import { SlSettings } from "react-icons/sl";
 import { FiEdit } from "react-icons/fi";
 import { GlobalContext } from "../../contexts/GlobalContextProvider";
 import { signIn, useSession, signOut } from "next-auth/react";
 import { HiLogout } from "react-icons/hi";
 import Link from "next/link";
+import toast from "react-hot-toast";
 
 const Header = () => {
   const { data: sessionData, status } = useSession();
@@ -16,15 +18,15 @@ const Header = () => {
         <IoReorderThreeOutline className="text-2xl text-gray-600" />
       </div>
       <Link href={"/"} className="cursor-pointer select-none text-xl font-thin">
-        This is the header
+        Another Recipe Community!
       </Link>
       {status === "authenticated" ? (
         <div className="flex items-center space-x-4">
           <div>
-            <BsBell className="text-2xl text-gray-600" />
+            <BsBell className="cursor-pointer text-2xl text-gray-600" />
           </div>
           <div>
-            <div className="h-5 w-5 rounded-full bg-gray-600" />
+            <SlSettings className="cursor-pointer text-2xl text-gray-600" />
           </div>
           <div>
             <button

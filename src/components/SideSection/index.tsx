@@ -11,15 +11,15 @@ const SideSection = () => {
   const suggestions = trpc.user.getUsersSuggestions.useQuery();
 
   const followUser = trpc.user.followUser.useMutation({
-    onSuccess: ()=>{
-      toast.success("You are now following this user!")
-    }
-  })
+    onSuccess: () => {
+      toast.success("You are now following this user!");
+    },
+  });
 
   return (
     <aside className="top-20 col-span-4 flex h-full w-full flex-col space-y-4 p-6">
       <div className="my-6 text-lg font-semibold">
-        <h3>People you may find interesting</h3>
+        <h3>Profiles you may find interesting</h3>
 
         <div className="flex flex-col space-y-4"></div>
         {suggestions.isSuccess &&
@@ -42,9 +42,14 @@ const SideSection = () => {
                 <div className="text-xs">{user.username}</div>
               </div>
               <div>
-                <button onClick={()=> followUser.mutate({
-                  userIdToFollow: user.id
-                })} className="border-gray-300/400 flex items-center space-x-3 rounded  border px-4 py-2 transition hover:border-gray-900 hover:text-gray-900">
+                <button
+                  onClick={() =>
+                    followUser.mutate({
+                      userIdToFollow: user.id,
+                    })
+                  }
+                  className="border-gray-300/400 flex items-center space-x-3 rounded  border px-4 py-2 transition hover:border-gray-900 hover:text-gray-900"
+                >
                   Follow
                 </button>
               </div>
@@ -61,9 +66,8 @@ const SideSection = () => {
                 key={bookmark.id}
                 className="group flex items-center space-x-6"
               >
-                <div className="aspect-square h-full w-2/5 rounded-xl bg-gray-300"></div>
-                <div className="flex w-3/5 flex-col space-y-2">
-                  <div className="decoration-indigo text-lg font-semibold group-hover:underline">
+                <div className="flex w-full flex-col space-y-2">
+                  <div className="text-lg font-normal group-hover:underline">
                     {bookmark.post.title}
                   </div>
                   <div className="truncate">{bookmark.post.description}</div>
