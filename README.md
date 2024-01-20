@@ -26,3 +26,7 @@ You can check out the [create-t3-app GitHub repository](https://github.com/t3-os
 ## How do I deploy this?
 
 Follow our deployment guides for [Vercel](https://create.t3.gg/en/deployment/vercel) and [Docker](https://create.t3.gg/en/deployment/docker) for more information.
+
+## start docker 
+## pnpm dev
+## npx prisma db push to sync db if changes are made to the db schema

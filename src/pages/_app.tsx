@@ -14,9 +14,9 @@ const MyApp: AppType<{ session: Session | null }> = ({
 }) => {
   return (
     <SessionProvider session={session}>
-      <Toaster/>
+      <Toaster />
       <GlobalContextProvider>
-      <Component {...pageProps} />
+        <Component {...pageProps} />
       </GlobalContextProvider>
     </SessionProvider>
   );
