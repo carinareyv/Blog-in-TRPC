@@ -86,12 +86,18 @@ const UserProfilePage = () => {
     modalType: "followers",
   });
 
-  const followers = trpc.user.getAllFollowers.useQuery({
-    userId: userProfile?.data?.id as string
-  }, {enabled: Boolean(userProfile?.data?.id)});
-  const following = trpc.user.getAllFollowing.useQuery({
-    userId: userProfile?.data?.id as string
-  }, {enabled: Boolean(userProfile?.data?.id)});
+  const followers = trpc.user.getAllFollowers.useQuery(
+    {
+      userId: userProfile?.data?.id as string,
+    },
+    { enabled: Boolean(userProfile?.data?.id) }
+  );
+  const following = trpc.user.getAllFollowing.useQuery(
+    {
+      userId: userProfile?.data?.id as string,
+    },
+    { enabled: Boolean(userProfile?.data?.id) }
+  );
 
   const followUser = trpc.user.followUser.useMutation({
     onSuccess: () => {
@@ -101,9 +107,9 @@ const UserProfilePage = () => {
       userRoute.getUserProfile.invalidate();
       toast.success("You are now following this user!");
     },
-    onError: (err)=> {
-      toast.error(err.message)
-    }
+    onError: (err) => {
+      toast.error(err.message);
+    },
   });
 
   const unfollowUser = trpc.user.unfollowUser.useMutation({
@@ -115,6 +121,7 @@ const UserProfilePage = () => {
       toast.success("You have unfollowed this user!");
     },
   });
+  console.log("DATA");
 
   return (
     <MainLayout>
@@ -135,22 +142,25 @@ const UserProfilePage = () => {
                     key={user.id}
                     className="my-1 flex w-full items-center justify-between rounded-xl bg-gray-200 px-4 py-2"
                   >
-                    <div> {user.name}</div>
-
-                    <button
-                      onClick={() =>
-                        user.followedBy.length > 0
-                          ? unfollowUser.mutate({
-                              userIdToUnfollow: user.id,
-                            })
-                          : followUser.mutate({
-                              userIdToFollow: user.id,
-                            })
-                      }
-                      className="flex items-center space-x-3 rounded-xl  border border-gray-300/50  bg-white px-4 py-2 transition hover:border-gray-900 hover:text-gray-900"
-                    >
-                      {user.followedBy.length > 0 ? "Unfollow" : "Follow"}
-                    </button>
+                    <div> {user.name} </div>
+                    {currentUser.data?.user?.id !== user.id && (
+                      <div>
+                        <button
+                          onClick={() =>
+                            user.followedBy.length > 0
+                              ? unfollowUser.mutate({
+                                  userIdToUnfollow: user.id,
+                                })
+                              : followUser.mutate({
+                                  userIdToFollow: user.id,
+                                })
+                          }
+                          className="flex items-center space-x-3 rounded-xl  border border-gray-300/50  bg-white px-4 py-2 transition hover:border-gray-900 hover:text-gray-900"
+                        >
+                          {user.followedBy.length > 0 ? "Unfollow" : "Follow"}
+                        </button>
+                      </div>
+                    )}
                   </div>
                 ))}
               </div>
@@ -165,19 +175,22 @@ const UserProfilePage = () => {
                     className="flex w-full items-center justify-between rounded-xl bg-gray-200 px-4 py-2"
                   >
                     <div>{user.name}</div>
-                    <div>
-                      {" "}
-                      <button
-                        onClick={() =>
-                          unfollowUser.mutate({
-                            userIdToUnfollow: user.id,
-                          })
-                        }
-                        className="flex items-center space-x-3  rounded-xl border border-gray-300/50  bg-white px-4 py-2 transition hover:border-gray-900 hover:text-gray-900"
-                      >
-                        Unfollow
-                      </button>
-                    </div>
+
+                    {currentUser.data?.user?.id !== user.id && (
+                      <div>
+                        {" "}
+                        <button
+                          onClick={() =>
+                            unfollowUser.mutate({
+                              userIdToUnfollow: user.id,
+                            })
+                          }
+                          className="flex items-center space-x-3  rounded-xl border border-gray-300/50  bg-white px-4 py-2 transition hover:border-gray-900 hover:text-gray-900"
+                        >
+                          Unfollow
+                        </button>
+                      </div>
+                    )}
                   </div>
                 ))}
               </div>
@@ -278,26 +291,28 @@ const UserProfilePage = () => {
                     <SlShareAlt />
                   </div>
                 </button>
-                {userProfile.isSuccess && userProfile.data?.followedBy && (
-                  <button
-                    onClick={() => {
-                      if (userProfile.data?.id) {
-                        userProfile.data.followedBy.length > 0
-                          ? unfollowUser.mutate({
-                              userIdToUnfollow: userProfile.data?.id,
-                            })
-                          : followUser.mutate({
-                              userIdToFollow: userProfile.data?.id,
-                            });
-                      }
-                    }}
-                    className="mt-2 flex items-center space-x-3 rounded  border border-gray-300/50  bg-white px-4 py-2 transition hover:border-gray-900 hover:text-gray-900"
-                  >
-                    {userProfile.data?.followedBy.length > 0
-                      ? "Unfollow"
-                      : "Follow"}
-                  </button>
-                )}
+                {userProfile.isSuccess &&
+                  userProfile.data?.followedBy &&
+                  currentUser.data?.user?.id !== userProfile.data.id && (
+                    <button
+                      onClick={() => {
+                        if (userProfile.data?.id) {
+                          userProfile.data.followedBy.length > 0
+                            ? unfollowUser.mutate({
+                                userIdToUnfollow: userProfile.data?.id,
+                              })
+                            : followUser.mutate({
+                                userIdToFollow: userProfile.data?.id,
+                              });
+                        }
+                      }}
+                      className="mt-2 flex items-center space-x-3 rounded  border border-gray-300/50  bg-white px-4 py-2 transition hover:border-gray-900 hover:text-gray-900"
+                    >
+                      {userProfile.data?.followedBy.length > 0
+                        ? "Unfollow"
+                        : "Follow"}
+                    </button>
+                  )}
               </div>
             </div>
           </div>
