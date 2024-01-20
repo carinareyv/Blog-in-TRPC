@@ -8,6 +8,12 @@ import Post from "../Post";
 
 const MainSection = () => {
   const getPosts = trpc.post.getPosts.useQuery();
+  console.log(
+    "POSTS",
+    getPosts?.data?.map((post) => {
+      post.createdAt;
+    })
+  );
 
   return (
     <main className="col-span-8 h-full w-full border-r border-gray-300 ">
