@@ -8,6 +8,8 @@ import { trpc } from "../../utils/trpc";
 import { z } from "zod";
 import { BiLoaderAlt } from "react-icons/bi";
 import toast from "react-hot-toast";
+import { buttonClass } from "../../shared/tools";
+import { messages } from "./messages";
 
 export const unsplashSearchSchema = z.object({
   searchQuery: z.string().min(2),
@@ -51,7 +53,7 @@ const UnsplashGallery = ({
       onSuccess: () => {
         setIsUnsplashModalOpen(false);
         reset();
-        toast.success("Featured image updated!");
+        toast.success(messages.update);
         utils.post.getPost.invalidate({ slug });
       },
     }
@@ -66,7 +68,7 @@ const UnsplashGallery = ({
         <input
           type="text"
           id="search"
-          placeholder="What are we looking for?"
+          placeholder={messages.looking}
           {...register("searchQuery")}
           className="h-full w-full rounded-xl border border-gray-300 p-4 outline-none focus:border-gray-600"
         />
@@ -103,7 +105,7 @@ const UnsplashGallery = ({
         {selectedImage && (
           <button
             type="submit"
-            className="flex items-center space-x-3 rounded border  border-gray-200 px-4 py-2 transition hover:border-gray-900 hover:text-gray-900"
+            className={buttonClass}
             onClick={() => {
               updatePostFeaturedImage.mutate({
                 imageUrl: selectedImage,
@@ -112,7 +114,9 @@ const UnsplashGallery = ({
             }}
             disabled={updatePostFeaturedImage.isLoading}
           >
-            {updatePostFeaturedImage.isLoading ? "Loading..." : "Confirm"}
+            {updatePostFeaturedImage.isLoading
+              ? messages.loading
+              : messages.confirm}
           </button>
         )}
       </div>

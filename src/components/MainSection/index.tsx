@@ -6,6 +6,8 @@ import { AiOutlineLoading3Quarters } from "react-icons/ai";
 import Post from "../Post";
 import InfiniteScroll from "react-infinite-scroll-component";
 import { BiLoaderCircle } from "react-icons/bi";
+import { basicClass } from "../../shared/tools";
+import { messages } from "./messages";
 
 const MainSection = () => {
   const getPosts = trpc.post.getPosts.useInfiniteQuery(
@@ -33,7 +35,7 @@ const MainSection = () => {
               name="search"
               id="search"
               className="w-full rounded-lg px-4 py-1 pl-7 text-sm outline-none placeholder:text-xs placeholder:text-gray-300"
-              placeholder="Search..."
+              placeholder={messages.search}
             />
           </label>
           <div className="flex w-full items-center justify-end space-x-4">
@@ -54,11 +56,11 @@ const MainSection = () => {
       </div>
       <div className="flex w-full flex-col justify-center space-y-8 px-24">
         {getPosts.isLoading && (
-          <div className="flex h-full w-full items-center justify-center space-x-4">
+          <div className={`${basicClass} w-full space-x-4`}>
             <div>
               <AiOutlineLoading3Quarters className="animate-spin" />
             </div>
-            <div>Loading...</div>
+            <div>{messages.loading}</div>
           </div>
         )}
 
@@ -69,13 +71,13 @@ const MainSection = () => {
           next={getPosts.fetchNextPage}
           hasMore={Boolean(getPosts.hasNextPage)}
           loader={
-            <div className="flex h-full w-full items-center justify-center">
+            <div className={`${basicClass} w-full`}>
               <BiLoaderCircle className="animate-spin" />
             </div>
           }
           endMessage={
-            <p className="text-center">
-              <b>Yay! You have seen it all</b>
+            <p className="pt-3 text-center">
+              <b>{messages.seen}</b>
             </p>
           }
         >
