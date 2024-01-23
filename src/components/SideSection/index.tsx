@@ -4,6 +4,8 @@ import dayjs from "dayjs";
 import Link from "next/link";
 import Image from "next/image";
 import toast from "react-hot-toast";
+import { buttonClass } from "../../shared/tools";
+import { messages } from "./messages";
 
 const SideSection = () => {
   const readingList = trpc.post.getReadingList.useQuery();
@@ -12,14 +14,14 @@ const SideSection = () => {
 
   const followUser = trpc.user.followUser.useMutation({
     onSuccess: () => {
-      toast.success("You are now following this user!");
+      toast.success(messages.following);
     },
   });
 
   return (
     <aside className="top-20 col-span-4 flex h-full w-full flex-col space-y-4 p-6">
       <div className="my-6 text-lg font-semibold">
-        <h3>Profiles you may find interesting</h3>
+        <h3>{messages.profiles}</h3>
 
         <div className="flex flex-col space-y-4"></div>
         {suggestions.isSuccess &&
@@ -48,16 +50,16 @@ const SideSection = () => {
                       userIdToFollow: user.id,
                     })
                   }
-                  className="border-gray-300/400 flex items-center space-x-3 rounded  border px-4 py-2 transition hover:border-gray-900 hover:text-gray-900"
+                  className={buttonClass}
                 >
-                  Follow
+                  {messages.follow}
                 </button>
               </div>
             </div>
           ))}
       </div>
       <div>
-        <h3 className="my-6 text-lg font-semibold">Your reading list</h3>
+        <h3 className="my-6 text-lg font-semibold">{messages.list}</h3>
         <div className="flex flex-col space-y-8">
           {readingList.data &&
             readingList.data.map((bookmark) => (

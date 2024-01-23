@@ -8,6 +8,9 @@ import { trpc } from "../../utils/trpc";
 import toast from "react-hot-toast";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
+import { messages } from "./messages";
+import { buttonClass } from "../../shared/tools";
+
 dayjs.extend(relativeTime);
 
 type CommentSideBarProps = {
@@ -43,7 +46,7 @@ const CommentSideBar = ({
 
   const commentPost = trpc.post.commentPost.useMutation({
     onSuccess: () => {
-      toast.success("Comment received!");
+      toast.success(messages.commentReceived);
       postRoute.getComments.invalidate({
         postId,
       });
@@ -96,15 +99,12 @@ const CommentSideBar = ({
                     id="comment"
                     rows={3}
                     className="focus:border-grey-600 m-3 w-full rounded-xl border border-gray-300 p-4 shadow-lg outline-none"
-                    placeholder="What are your thoughts?"
+                    placeholder={messages.thoughts}
                     {...register("text")}
                   />
                   {isValid && (
-                    <button
-                      type="submit"
-                      className="flex items-center space-x-3 rounded border  border-gray-300 px-4 py-2 transition hover:border-gray-900 hover:text-gray-900"
-                    >
-                      Comment
+                    <button type="submit" className={buttonClass}>
+                      {messages.comment}
                     </button>
                   )}
                 </form>

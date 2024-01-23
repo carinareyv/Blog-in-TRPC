@@ -12,6 +12,8 @@ import { useSession } from "next-auth/react";
 import { createClient } from "@supabase/supabase-js";
 import { env } from "../../env/client.mjs";
 import Modal from "../../components/Modal";
+import { buttonClass } from "../../shared/tools";
+import { messages } from "../messages";
 
 // Create a single supabase client for interacting with your database
 const supabase = createClient(
@@ -53,7 +55,7 @@ const UserProfilePage = () => {
         userRoute.getUserProfile.invalidate({
           username: userProfile.data?.username as string,
         });
-        toast.success("Your avatar was successfully changed");
+        toast.success(messages.avatarSuccess);
       }
     },
   });
@@ -62,7 +64,7 @@ const UserProfilePage = () => {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
       if (file.size > 1.5 * 1000000) {
-        return toast.error("Image should not exceed 1MB");
+        return toast.error(messages.avatarError);
       }
       setFile(file);
       setObjectImage(URL.createObjectURL(file));
@@ -105,7 +107,7 @@ const UserProfilePage = () => {
       userRoute.getAllFollowers.invalidate();
       userRoute.getAllFollowing.invalidate();
       userRoute.getUserProfile.invalidate();
-      toast.success("You are now following this user!");
+      toast.success(messages.followingSuccess);
     },
     onError: (err) => {
       toast.error(err.message);
@@ -118,10 +120,9 @@ const UserProfilePage = () => {
       userRoute.getAllFollowers.invalidate();
       userRoute.getAllFollowing.invalidate();
       userRoute.getUserProfile.invalidate();
-      toast.success("You have unfollowed this user!");
+      toast.success(messages.unfollowingSuccess);
     },
   });
-  console.log("DATA");
 
   return (
     <MainLayout>
@@ -135,7 +136,7 @@ const UserProfilePage = () => {
           <div className="flex w-full flex-col items-center justify-center space-y-4">
             {isFollowModalOpen.modalType === "followers" && (
               <div className="flex w-full flex-col justify-center">
-                <h3 className="my-2 p-2 text-xl">Followers</h3>
+                <h3 className="my-2 p-2 text-xl">{messages.followers}</h3>
 
                 {followers.data?.followedBy?.map((user) => (
                   <div
@@ -155,9 +156,11 @@ const UserProfilePage = () => {
                                   userIdToFollow: user.id,
                                 })
                           }
-                          className="flex items-center space-x-3 rounded-xl  border border-gray-300/50  bg-white px-4 py-2 transition hover:border-gray-900 hover:text-gray-900"
+                          className={`${buttonClass} bg-white `}
                         >
-                          {user.followedBy.length > 0 ? "Unfollow" : "Follow"}
+                          {user.followedBy.length > 0
+                            ? messages.unfollow
+                            : messages.follow}
                         </button>
                       </div>
                     )}
@@ -168,7 +171,7 @@ const UserProfilePage = () => {
 
             {isFollowModalOpen.modalType === "following" && (
               <div className="flex w-full flex-col justify-center">
-                <h3 className="my-2 p-2 text-xl">Following</h3>
+                <h3 className="my-2 p-2 text-xl">{messages.following}</h3>
                 {following.data?.followings?.map((user) => (
                   <div
                     key={user.id}
@@ -185,9 +188,9 @@ const UserProfilePage = () => {
                               userIdToUnfollow: user.id,
                             })
                           }
-                          className="flex items-center space-x-3  rounded-xl border border-gray-300/50  bg-white px-4 py-2 transition hover:border-gray-900 hover:text-gray-900"
+                          className={`${buttonClass} bg-white `}
                         >
-                          Unfollow
+                          {messages.unfollow}
                         </button>
                       </div>
                     )}
@@ -246,7 +249,7 @@ const UserProfilePage = () => {
               </div>
               <div className="text-gray-600">@{userProfile.data?.username}</div>
               <div className="text-gray-600">
-                {userProfile.data?._count.posts ?? 0} Posts
+                {userProfile.data?._count.posts ?? 0} {messages.posts}
               </div>
               <div className=" flex items-center space-x-4">
                 <button
@@ -261,7 +264,7 @@ const UserProfilePage = () => {
                   <span className="text-gray-900">
                     {userProfile.data?._count.followedBy}
                   </span>{" "}
-                  Followers
+                  {messages.followers}
                 </button>
                 <button
                   onClick={() =>
@@ -275,18 +278,18 @@ const UserProfilePage = () => {
                   <span className="text-gray-900">
                     {userProfile.data?._count.followings}
                   </span>{" "}
-                  Following
+                  {messages.following}
                 </button>
               </div>
               <div className="flex w-full items-center space-x-4">
                 <button
                   onClick={() => {
                     navigator.clipboard.writeText(window.location.href);
-                    toast.success("URL copied to clipboard!");
+                    toast.success(messages.copied);
                   }}
-                  className="mt-2 flex transform items-center space-x-3  rounded border border-gray-200 px-4 py-2 transition hover:border-gray-900 hover:text-gray-900 active:scale-95"
+                  className={`${buttonClass} mt-2 active:scale-95`}
                 >
-                  <div>Share</div>
+                  <div>{messages.shared}</div>
                   <div>
                     <SlShareAlt />
                   </div>
@@ -306,11 +309,11 @@ const UserProfilePage = () => {
                               });
                         }
                       }}
-                      className="mt-2 flex items-center space-x-3 rounded  border border-gray-300/50  bg-white px-4 py-2 transition hover:border-gray-900 hover:text-gray-900"
+                      className={`${buttonClass} mt-2 bg-white`}
                     >
                       {userProfile.data?.followedBy.length > 0
-                        ? "Unfollow"
-                        : "Follow"}
+                        ? messages.unfollow
+                        : messages.follow}
                     </button>
                   )}
               </div>
