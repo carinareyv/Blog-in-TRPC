@@ -1,11 +1,14 @@
 import React, { useContext } from "react";
 import { IoReorderThreeOutline } from "react-icons/io5";
 import { BsBell } from "react-icons/bs";
+import { SlSettings } from "react-icons/sl";
 import { FiEdit } from "react-icons/fi";
 import { GlobalContext } from "../../contexts/GlobalContextProvider";
 import { signIn, useSession, signOut } from "next-auth/react";
 import { HiLogout } from "react-icons/hi";
 import Link from "next/link";
+import { messages } from "./messages";
+import { iconButtonClass, buttonClass } from "../../shared/tools";
 
 const Header = () => {
   const { data: sessionData, status } = useSession();
@@ -16,33 +19,30 @@ const Header = () => {
         <IoReorderThreeOutline className="text-2xl text-gray-600" />
       </div>
       <Link href={"/"} className="cursor-pointer select-none text-xl font-thin">
-        This is the header
+        {messages.title}
       </Link>
       {status === "authenticated" ? (
         <div className="flex items-center space-x-4">
           <div>
-            <BsBell className="text-2xl text-gray-600" />
+            <BsBell className={iconButtonClass} />
           </div>
           <div>
-            <div className="h-5 w-5 rounded-full bg-gray-600" />
+            <SlSettings className={iconButtonClass} />
           </div>
           <div>
             <button
               onClick={() => setIsWriteModalOpen(true)}
-              className="flex items-center space-x-3 rounded border  border-gray-200 px-4 py-2 transition hover:border-gray-900 hover:text-gray-900"
+              className={buttonClass}
             >
-              <div>Write</div>
+              <div>{messages.write}</div>
               <div>
                 <FiEdit className="text-gray-600" />
               </div>
             </button>
           </div>
           <div>
-            <button
-              onClick={() => signOut()}
-              className="flex items-center space-x-3 rounded border  border-gray-200 px-4 py-2 transition hover:border-gray-900 hover:text-gray-900"
-            >
-              <div>Log Out</div>
+            <button onClick={() => signOut()} className={buttonClass}>
+              <div>{messages.logOut}</div>
               <div>
                 <HiLogout className="text-gray-600" />
               </div>
@@ -51,11 +51,8 @@ const Header = () => {
         </div>
       ) : (
         <div>
-          <button
-            onClick={() => signIn()}
-            className="flex items-center space-x-3 rounded border  border-gray-200 px-4 py-2 transition hover:border-gray-900 hover:text-gray-900"
-          >
-            Sign In{" "}
+          <button onClick={() => signIn()} className={buttonClass}>
+            {messages.signIn}{" "}
           </button>
         </div>
       )}

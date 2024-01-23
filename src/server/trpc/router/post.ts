@@ -5,6 +5,8 @@ import { z } from "zod";
 import { commentFormSchema } from "../../../components/CommentSideBar";
 import { TRPCError } from "@trpc/server";
 
+const limit = 10;
+
 export const postRouter = router({
   //bookmarks
   bookmarkPost: protectedProcedure
@@ -40,6 +42,7 @@ export const postRouter = router({
               description: true,
               createdAt: true,
               slug: true,
+              featuredImage: true,
               author: {
                 select: {
                   name: true,
@@ -139,13 +142,14 @@ export const postRouter = router({
     .mutation(
       async ({
         ctx: { prisma, session },
-        input: { title, description, text, tagsIds },
+        input: { title, description, text, tagsIds, html },
       }) => {
         await prisma.post.create({
           data: {
             title,
             description,
             text,
+            html,
             slug: slugify(title),
             tags: {
               connect: tagsIds,
@@ -193,6 +197,7 @@ export const postRouter = router({
           description: true,
           title: true,
           text: true,
+          html: true,
           likes: session?.user?.id
             ? {
                 where: {
@@ -208,43 +213,56 @@ export const postRouter = router({
       return post;
     }),
 
-  getPosts: publicProcedure.query(async ({ ctx: { prisma, session } }) => {
-    const posts = await prisma.post.findMany({
-      orderBy: {
-        createdAt: "desc",
-      },
-      select: {
-        id: true,
-        slug: true,
-        title: true,
-        description: true,
-        createdAt: true,
-        author: {
-          select: {
-            name: true,
-            image: true,
-            username: true,
-          },
+  getPosts: publicProcedure
+    .input(
+      z.object({
+        cursor: z.string().nullish(),
+      })
+    )
+    .query(async ({ ctx: { prisma, session }, input: { cursor } }) => {
+      const posts = await prisma.post.findMany({
+        orderBy: {
+          createdAt: "desc",
         },
-        bookmarks: session?.user?.id
-          ? {
-              where: {
-                userId: session?.user?.id,
-              },
-            }
-          : false,
-        tags: {
-          select: {
-            name: true,
-            id: true,
-            slug: true,
+        select: {
+          id: true,
+          slug: true,
+          title: true,
+          description: true,
+          createdAt: true,
+          author: {
+            select: {
+              name: true,
+              image: true,
+              username: true,
+            },
           },
+          bookmarks: session?.user?.id
+            ? {
+                where: {
+                  userId: session?.user?.id,
+                },
+              }
+            : false,
+          tags: {
+            select: {
+              name: true,
+              id: true,
+              slug: true,
+            },
+          },
+          featuredImage: true,
         },
-        featuredImage: true,
-      },
-    });
-    return posts;
-  }),
+        cursor: cursor ? { id: cursor } : undefined,
+        take: limit + 1,
+      });
+      let nextCursor: typeof cursor | undefined = undefined;
+      if (posts.length > limit) {
+        const nextItem = posts.pop();
+        if (nextItem) nextCursor = nextItem.id;
+      }
+      return { posts, nextCursor };
+    }),
 
   likePost: protectedProcedure
     .input(

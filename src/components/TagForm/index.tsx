@@ -5,6 +5,7 @@ import Modal from "../Modal";
 import { z } from "zod";
 import { trpc } from "../../utils/trpc";
 import toast from "react-hot-toast";
+import { messages } from "./messages";
 
 export const createTagSchema = z.object({
   name: z.string().min(2),
@@ -30,7 +31,7 @@ const TagForm = ({ isOpen, onClose }: TagFormProps) => {
 
   const createTag = trpc.tag.createTag.useMutation({
     onSuccess: () => {
-      toast.success("Tag created successfully!");
+      toast.success(messages.tag);
       reset();
     },
   });
@@ -45,7 +46,7 @@ const TagForm = ({ isOpen, onClose }: TagFormProps) => {
           type="text"
           id="name"
           className="focus:border-grey-600 h-full w-full rounded-xl border border-gray-300 p-4 outline-none"
-          placeholder="Tag name"
+          placeholder={messages.name}
           {...register("name")}
         />
         <p className="w-full pb-2 text-left text-sm text-red-500">
@@ -55,7 +56,7 @@ const TagForm = ({ isOpen, onClose }: TagFormProps) => {
           type="text"
           id="description"
           className="focus:border-grey-600 h-full w-full rounded-xl border border-gray-300 p-4 outline-none"
-          placeholder="Tag description"
+          placeholder={messages.description}
           {...register("description")}
         />
         <p className="w-full pb-2 text-left text-sm text-red-500">
@@ -66,7 +67,7 @@ const TagForm = ({ isOpen, onClose }: TagFormProps) => {
             type="submit"
             className="w-fit space-x-3 whitespace-nowrap rounded border border-gray-200 px-4  py-2 text-right text-sm transition hover:border-gray-900 hover:text-gray-900"
           >
-            Create Tag
+            {messages.create}
           </button>
         </div>
       </form>

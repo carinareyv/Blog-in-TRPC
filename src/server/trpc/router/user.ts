@@ -41,12 +41,13 @@ export const userRouter = router({
       }
     ),
 
-  getAllFollowers: protectedProcedure.input(
-    z.object({
-      userId: z.string()
-    })
-  ).query(
-    async ({ ctx: { prisma, session }, input:{userId} }) => {
+  getAllFollowers: protectedProcedure
+    .input(
+      z.object({
+        userId: z.string(),
+      })
+    )
+    .query(async ({ ctx: { prisma, session }, input: { userId } }) => {
       return await prisma.user.findUnique({
         where: {
           id: userId,
@@ -67,15 +68,15 @@ export const userRouter = router({
           },
         },
       });
-    }
-  ),
+    }),
 
-  getAllFollowing: protectedProcedure.input(
-    z.object({
-      userId: z.string()
-    })
-  ).query(
-    async ({ ctx: { prisma, session }, input: {userId} }) => {
+  getAllFollowing: protectedProcedure
+    .input(
+      z.object({
+        userId: z.string(),
+      })
+    )
+    .query(async ({ ctx: { prisma, session }, input: { userId } }) => {
       return await prisma.user.findUnique({
         where: {
           id: userId,
@@ -91,8 +92,7 @@ export const userRouter = router({
           },
         },
       });
-    }
-  ),
+    }),
 
   getUserProfile: publicProcedure
     .input(
@@ -169,6 +169,9 @@ export const userRouter = router({
                   slug: true,
                 },
               },
+            },
+            orderBy: {
+              createdAt: "desc",
             },
           },
         },

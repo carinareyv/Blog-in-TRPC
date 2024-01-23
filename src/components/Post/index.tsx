@@ -5,8 +5,9 @@ import { trpc } from "../../utils/trpc";
 import type { RouterOutputs } from "../../utils/trpc";
 import Link from "next/link";
 import { CiBookmarkCheck, CiBookmarkPlus } from "react-icons/ci";
+import { messages } from "./messages";
 
-type PostProps = RouterOutputs["post"]["getPosts"][number];
+type PostProps = RouterOutputs["post"]["getPosts"]["posts"][number];
 
 const Post = ({ ...post }: PostProps) => {
   const [isBookmarked, setIsbookmarked] = useState(
@@ -25,7 +26,7 @@ const Post = ({ ...post }: PostProps) => {
   return (
     <div
       key={post.id}
-      className="flex flex-col space-y-4 border-b border-gray-300 pb-8 last:border-none"
+      className="flex flex-col space-y-4 border-b border-gray-300 py-5 pb-8 last:border-none"
     >
       <Link
         href={`/user/${post.author.username}`}
@@ -49,7 +50,7 @@ const Post = ({ ...post }: PostProps) => {
               {dayjs(post.createdAt).format("DD/MM/YYYY")}
             </span>
           </p>
-          <p className="text-sm">Developer</p>
+          <p className="text-sm">{messages.creator}</p>
         </div>
       </Link>
       <Link
@@ -84,7 +85,7 @@ const Post = ({ ...post }: PostProps) => {
             <div
               key={tag.id}
               onClick={() => {
-                //TODO Carina: Redirect the user to all posts with that tag
+                //TODO: Redirect the user to all posts with that tag
               }}
               className="rounded-2xl bg-gray-200/50 px-5 py-3"
             >

@@ -10,6 +10,8 @@ import { BiImageAdd } from "react-icons/bi";
 import UnsplashGallery from "../components/UnsplashGallery";
 import { useSession } from "next-auth/react";
 import Image from "next/image";
+import { Interweave } from "interweave";
+import { messages } from "./messages";
 
 const PostPage = () => {
   const router = useRouter();
@@ -69,7 +71,7 @@ const PostPage = () => {
           <div>
             <AiOutlineLoading3Quarters className="animate-spin" />
           </div>
-          <div>Loading...</div>
+          <div>{messages.loading}</div>
         </div>
       )}
 
@@ -132,7 +134,11 @@ const PostPage = () => {
           <div className="border-l-4 border-gray-800 pl-6">
             {getPost.data?.description}
           </div>
-          <div>{getPost.data?.text}</div>
+          {/*} <div>{getPost.data?.text}</div>*/}
+          {/* Interweave is a React library that lets us safeliy render HTML */}
+          <div className="prose lg:prose-xl">
+            <Interweave content={getPost.data?.html} />
+          </div>
         </div>
       </div>
     </MainLayout>

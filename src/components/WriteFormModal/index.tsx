@@ -1,7 +1,7 @@
 import React, { useContext, useState } from "react";
 import Modal from "../Modal";
 import { GlobalContext } from "../../contexts/GlobalContextProvider";
-import { useForm } from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { trpc } from "../../utils/trpc";
@@ -10,6 +10,15 @@ import { AiOutlineLoading3Quarters } from "react-icons/ai";
 import Tags from "../Tags";
 import TagForm from "../TagForm";
 import { FaTimes } from "react-icons/fa";
+import "react-quill/dist/quill.snow.css";
+import dynamic from "next/dynamic";
+import { buttonClass } from "../../shared/tools";
+import { messages } from "./messages";
+
+//We are using (and importing) dynamic because we need to disable server-side rendering to use the ReactQuill React Component since document is only defined on client browser (CSR)
+const ReactQuill = dynamic(() => import("react-quill"), {
+  ssr: false,
+});
 
 export type Tag = { id: string; name: string };
 
@@ -17,12 +26,14 @@ type WriteFormType = {
   title: string;
   description: string;
   text: string;
+  html: string;
 };
 
 export const writePostSchema = z.object({
   title: z.string().min(10),
   description: z.string().min(60),
-  text: z.string().min(100),
+  text: z.string().min(100).optional(),
+  html: z.string().min(100),
 });
 
 const WriteFormModal = () => {
@@ -33,6 +44,7 @@ const WriteFormModal = () => {
     handleSubmit,
     formState: { errors },
     reset,
+    control,
   } = useForm<WriteFormType>({
     resolver: zodResolver(writePostSchema),
   });
@@ -41,7 +53,7 @@ const WriteFormModal = () => {
 
   const createPost = trpc.post.createPost.useMutation({
     onSuccess: () => {
-      toast.success("Post created successfully!");
+      toast.success(messages.success);
       setIsWriteModalOpen(false);
       reset();
       postRoute.getPosts.invalidate();
@@ -87,7 +99,7 @@ const WriteFormModal = () => {
                 onClick={() => setIsCreateTagModalOpen(true)}
                 className="space-x-3 whitespace-nowrap rounded border border-gray-200  px-4 py-2 text-sm transition hover:border-gray-900 hover:text-gray-900"
               >
-                Create Tag
+                {messages.create}
               </button>
             </div>
             <div className="my-4 flex w-full flex-wrap items-center ">
@@ -114,7 +126,9 @@ const WriteFormModal = () => {
         )}
 
         <form
-          onSubmit={handleSubmit(onSubmit)}
+          onSubmit={handleSubmit((data) => {
+            onSubmit(data);
+          })}
           className="relative flex flex-col items-center justify-center space-y-4"
         >
           {createPost.isLoading && (
@@ -126,7 +140,7 @@ const WriteFormModal = () => {
             type="text"
             id="title"
             className="focus:border-grey-600 h-full w-full rounded-xl border border-gray-300 p-4 outline-none"
-            placeholder="Title of the blog"
+            placeholder={messages.title}
             {...register("title")}
           />
           <p className="w-full pb-2 text-left text-sm text-red-500">
@@ -136,29 +150,42 @@ const WriteFormModal = () => {
             type="text"
             id="shortDescription"
             className="focus:border-grey-600 h-full w-full rounded-xl border border-gray-300 p-4 outline-none"
-            placeholder="Short Description about the blog"
+            placeholder={messages.description}
             {...register("description")}
           />
           <p className="w-full pb-2 text-left text-sm text-red-500">
             {errors.description?.message}
           </p>
-          <textarea
+          {/*<textarea
             id="mainBody"
             cols={10}
             rows={10}
             className="focus:border-grey-600 h-full w-full rounded-xl border border-gray-300 p-4 outline-none"
-            placeholder="Blog post main body"
+            placeholder={messages.main}
             {...register("text")}
+          />*/}
+          <Controller
+            name="html"
+            control={control}
+            render={({ field }) => (
+              <div className="w-full">
+                <ReactQuill
+                  theme="snow"
+                  {...field}
+                  placeholder={messages.write}
+                  value={field.value}
+                  onChange={(value) => field.onChange(value)}
+                />
+              </div>
+            )}
           />
+
           <p className="w-full pb-2 text-left text-sm text-red-500">
             {errors.text?.message}
           </p>
           <div className="flex w-full justify-end">
-            <button
-              type="submit"
-              className="flex items-center space-x-3 rounded border  border-gray-200 px-4 py-2 transition hover:border-gray-900 hover:text-gray-900"
-            >
-              Post
+            <button type="submit" className={buttonClass}>
+              {messages.post}
             </button>
           </div>
         </form>
